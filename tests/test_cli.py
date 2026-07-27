@@ -1,0 +1,92 @@
+import json
+import time
+
+from typer.testing import CliRunner
+
+from vercel_mcp import store
+from vercel_mcp.cli import app
+from vercel_mcp.store import Account
+
+runner = CliRunner()
+FUTURE_MS = (time.time() + 90 * 24 * 3600) * 1000
+
+
+def saved(email="saved@example.com", token="vca_saved") -> Account:
+    return Account(
+        email=email,
+        username="saved",
+        token=token,
+        refresh_token="rt",
+        expires_at=FUTURE_MS,
+        teams=[{"id": "t1", "slug": "team", "name": "Team"}],
+    )
+
+
+def test_version():
+    result = runner.invoke(app, ["--version"])
+    assert result.exit_code == 0 and "vgate" in result.stdout
+
+
+def test_agent_schema_is_json_with_tool_key():
+    result = runner.invoke(app, ["agent", "schema"])
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert payload["tool"] == "vgate"
+    assert {"sync", "switch", "doctor"} <= {c["name"] for c in payload["commands"]}
+
+
+def test_ls_empty_store_guides_the_user(store_file, vercel_dir):
+    result = runner.invoke(app, ["ls"])
+    assert result.exit_code == 0 and "vgate sync" in result.stdout
+
+
+def test_ls_lists_accounts(store_file, vercel_dir):
+    store.add_or_update(saved(), store_file)
+    result = runner.invoke(app, ["ls"])
+    assert result.exit_code == 0 and "saved@example.com" in result.stdout
+
+
+def test_switch_unknown_selector_exits_one(store_file, auth_file):
+    store.add_or_update(saved(), store_file)
+    result = runner.invoke(app, ["switch", "ghost@example.com"])
+    assert result.exit_code == 1 and "error" in result.stdout + result.stderr
+
+
+def test_switch_activates_account(store_file, auth_file):
+    store.add_or_update(saved(), store_file)
+    result = runner.invoke(app, ["switch", "saved@example.com"])
+    assert result.exit_code == 0
+    assert json.loads(auth_file.read_text())["token"] == "vca_saved"
+
+
+def test_whoami_without_login_exits_one(vercel_dir, store_file):
+    result = runner.invoke(app, ["whoami"])
+    assert result.exit_code == 1
+
+
+def test_whoami_reports_active_account(auth_file, store_file):
+    store.add_or_update(saved(token="vca_original"), store_file)
+    result = runner.invoke(app, ["whoami"])
+    assert result.exit_code == 0 and "saved@example.com" in result.stdout
+
+
+def test_use_sets_team(vercel_dir, store_file):
+    result = runner.invoke(app, ["use", "mlubich-projects"])
+    assert result.exit_code == 0
+    assert json.loads((vercel_dir / "config.json").read_text())["currentTeam"] == "mlubich-projects"
+
+
+def test_doctor_runs_and_warns_about_logout(auth_file, store_file):
+    result = runner.invoke(app, ["doctor"])
+    assert "vercel logout" in result.stdout
+
+
+def test_path_shows_both_locations(vercel_dir, store_file):
+    result = runner.invoke(app, ["path"])
+    assert result.exit_code == 0 and "vgate store" in result.stdout
+
+
+def test_rm_forgets_account(store_file, vercel_dir):
+    store.add_or_update(saved(), store_file)
+    result = runner.invoke(app, ["rm", "saved@example.com"])
+    assert result.exit_code == 0 and store.load(store_file) == []
