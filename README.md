@@ -45,7 +45,7 @@ Then switch whenever you like:
 $ vgate ls
   #  email               username   teams  token
   1  you@personal.com    you           2  valid     active
-  2  you@client.com      you-client    1  expiring
+  2  you@client.com      you-client    1  expiring-soon
 
 $ vgate switch you@client.com
 switched to you@client.com

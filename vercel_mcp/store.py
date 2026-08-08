@@ -16,7 +16,9 @@ from .config import store_path
 
 #: Epoch values at or above this are milliseconds, below it seconds.
 _MS_THRESHOLD = 10**11
-#: Credentials inside this window are reported as "expiring".
+#: Credentials inside this window are reported as "expiring-soon". They are
+#: still VALID and usable — the label warns that a refresh is due shortly, and
+#: is deliberately not "expiring", which reads as "expired" at a glance.
 EXPIRING_SOON_SECONDS = 24 * 60 * 60
 
 
@@ -65,7 +67,11 @@ class Account:
         return asdict(self)
 
     def status(self, now: float | None = None) -> str:
-        """One of ``valid``, ``expiring``, ``expired`` or ``unknown``."""
+        """One of ``valid``, ``expiring-soon``, ``expired`` or ``unknown``.
+
+        ``expiring-soon`` still means the credential WORKS; only ``expired``
+        means it does not.
+        """
         expiry = normalize_expiry(self.expires_at)
         if expiry is None:
             return "unknown"
@@ -73,7 +79,7 @@ class Account:
         if expiry <= now:
             return "expired"
         if expiry - now <= EXPIRING_SOON_SECONDS:
-            return "expiring"
+            return "expiring-soon"
         return "valid"
 
     def is_expired(self, now: float | None = None) -> bool:

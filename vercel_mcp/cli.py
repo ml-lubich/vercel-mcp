@@ -24,7 +24,7 @@ err_console = Console(stderr=True)
 
 STATUS_STYLE = {
     "valid": "green",
-    "expiring": "yellow",
+    "expiring-soon": "yellow",
     "expired": "red",
     "unknown": "dim",
 }

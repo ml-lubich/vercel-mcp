@@ -87,7 +87,20 @@ def test_status_handles_both_epoch_units(value, expected):
 
 def test_status_expiring_window():
     soon = time.time() + 3600
-    assert make(expires_at=soon).status() == "expiring"
+    assert make(expires_at=soon).status() == "expiring-soon"
+
+
+def test_expiring_soon_is_not_expired():
+    """A credential inside the warning window still works.
+
+    The old label for this state was "expiring", which reads as "expired" at a
+    glance — it cost a real debugging session, where every account showed
+    "expiring" and the tokens were wrongly declared dead. The label must never
+    again be mistakable for the terminal state.
+    """
+    soon = make(expires_at=time.time() + 3600)
+    assert not soon.is_expired()
+    assert soon.status() != "expired"
 
 
 def test_is_expired_matches_status():
