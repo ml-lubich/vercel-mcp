@@ -68,7 +68,7 @@ team: client-projects
 | `vgate whoami` | Show the active account and team |
 | `vgate doctor` | Check the local setup and flag expired credentials |
 | `vgate path` | Print the Vercel config and store locations |
-| `vgate rm <selector>` | Forget a stored account |
+| `vgate rm <selector>` | Forget a stored account (asks y/N; `--yes` skips, `delete` is an alias) |
 | `vgate agent schema` | Machine-readable command list (JSON) for automation |
 
 Run `vgate sync` after **every** `vercel login` — that is what makes an account switchable later.

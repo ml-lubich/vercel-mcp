@@ -88,5 +88,30 @@ def test_path_shows_both_locations(vercel_dir, store_file):
 
 def test_rm_forgets_account(store_file, vercel_dir):
     store.add_or_update(saved(), store_file)
-    result = runner.invoke(app, ["rm", "saved@example.com"])
+    result = runner.invoke(app, ["rm", "saved@example.com"], input="y\n")
     assert result.exit_code == 0 and store.load(store_file) == []
+
+
+def test_rm_asks_before_deleting_and_keeps_account_on_no(store_file, vercel_dir):
+    store.add_or_update(saved(), store_file)
+    result = runner.invoke(app, ["rm", "saved@example.com"], input="n\n")
+    assert result.exit_code != 0
+    assert "saved@example.com" in result.stdout
+    assert store.load(store_file) == [saved()]
+
+
+def test_rm_yes_skips_the_prompt(store_file, vercel_dir):
+    store.add_or_update(saved(), store_file)
+    result = runner.invoke(app, ["rm", "--yes", "saved@example.com"])
+    assert result.exit_code == 0 and store.load(store_file) == []
+
+
+def test_delete_is_an_alias_for_rm(store_file, vercel_dir):
+    store.add_or_update(saved(), store_file)
+    result = runner.invoke(app, ["delete", "saved@example.com"], input="y\n")
+    assert result.exit_code == 0 and store.load(store_file) == []
+
+
+def test_rm_unknown_account_never_prompts(store_file, vercel_dir):
+    result = runner.invoke(app, ["rm", "nobody@example.com"])
+    assert result.exit_code == 1

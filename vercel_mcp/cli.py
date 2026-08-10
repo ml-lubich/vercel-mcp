@@ -173,12 +173,24 @@ def path() -> None:
 
 
 @app.command("rm")
-def remove(selector: str = typer.Argument(..., help="Email, username, or list number.")) -> None:
+@app.command("delete", hidden=True)
+@app.command("remove", hidden=True)
+def remove(
+    selector: str = typer.Argument(..., help="Email, username, or list number."),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip the confirmation prompt."),
+) -> None:
     """Forget a stored account."""
     try:
-        account = store.remove(selector)
+        account = store.get(selector)
     except store.AccountNotFound as exc:
         raise _fail(str(exc)) from exc
+    if not yes:
+        typer.confirm(
+            f"Forget {account.email}? Its stored credential is deleted "
+            "and you would have to `vercel login` again.",
+            abort=True,
+        )
+    store.remove(account.email)
     console.print(f"[green]removed[/green] {account.email}")
 
 
@@ -202,7 +214,12 @@ def agent_schema() -> None:
             {"name": "whoami", "args": [], "description": "Show the active account and team."},
             {"name": "doctor", "args": [], "description": "Check setup and credential health."},
             {"name": "path", "args": [], "description": "Print config and store locations."},
-            {"name": "rm", "args": ["selector"], "description": "Forget a stored account."},
+            {
+                "name": "rm",
+                "aliases": ["delete", "remove"],
+                "args": ["selector", "--yes"],
+                "description": "Forget a stored account. Prompts unless --yes is passed.",
+            },
         ],
         "notes": [
             "There is no logout command by design.",
