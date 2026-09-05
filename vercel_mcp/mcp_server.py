@@ -21,7 +21,10 @@ def build_server():
             "`pip install 'vercel-mcp[mcp]'` or `pip install mcp`"
         )
 
-    server = FastMCP("vgate", version=__version__)
+    # FastMCP takes no `version` kwarg — passing one raises TypeError and the
+    # server never starts, which is why this showed up in Claude Code only as
+    # "Connection closed". The version still travels in the tool description.
+    server = FastMCP("vgate", instructions=f"Vercel account switching (vgate {__version__})")
 
     @server.tool()
     def list_accounts() -> list[dict]:

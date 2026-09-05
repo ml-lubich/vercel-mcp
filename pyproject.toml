@@ -29,7 +29,11 @@ dependencies = [
     "typer>=0.12",
     "rich>=13",
     "httpx>=0.27",
-    "mcp>=1.2",
+    # Upper bound is load-bearing: mcp 2.x renamed FastMCP to MCPServer and
+    # moved mcp.server.fastmcp, so an unpinned install silently breaks the
+    # server — it surfaces only as "Connection closed" in the MCP host.
+    # Lift this together with the migration to MCPServer, not before.
+    "mcp>=1.2,<2",
 ]
 
 [project.optional-dependencies]
