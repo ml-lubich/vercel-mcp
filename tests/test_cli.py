@@ -27,6 +27,13 @@ def test_version():
     assert result.exit_code == 0 and "vgate" in result.stdout
 
 
+def test_help_short_flag_on_root_and_subcommands():
+    for args in (["-h"], ["--help"], ["ls", "-h"], ["sync", "-h"], ["agent", "-h"], ["agent", "schema", "-h"]):
+        result = runner.invoke(app, args)
+        assert result.exit_code == 0, (args, result.output)
+        assert "Usage" in result.output
+
+
 def test_agent_schema_is_json_with_tool_key():
     result = runner.invoke(app, ["agent", "schema"])
     assert result.exit_code == 0

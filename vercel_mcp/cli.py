@@ -10,13 +10,19 @@ from rich.table import Table
 
 from . import __version__, config, core, store
 
+_HELP = {"help_option_names": ["-h", "--help"]}
+
 app = typer.Typer(
     name="vgate",
     help="Manage multiple Vercel CLI logins. Switch accounts instead of logging out.",
     no_args_is_help=True,
     add_completion=False,
+    context_settings=_HELP,
 )
-agent_app = typer.Typer(help="Machine-readable output for scripts and AI agents.")
+agent_app = typer.Typer(
+    help="Machine-readable output for scripts and AI agents.",
+    context_settings=_HELP,
+)
 app.add_typer(agent_app, name="agent")
 
 console = Console()
