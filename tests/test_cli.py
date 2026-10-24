@@ -1,4 +1,5 @@
 import json
+import re
 import time
 
 from typer.testing import CliRunner
@@ -29,11 +30,12 @@ def test_version():
 
 
 def test_root_help_has_only_supported_framework_options():
-    result = runner.invoke(app, ["-h"])
+    result = runner.invoke(app, ["-h"], color=True)
     assert result.exit_code == 0
-    assert "-V" in result.stdout and "--version" in result.stdout
-    assert "--install-completion" not in result.stdout
-    assert "--show-completion" not in result.stdout
+    help_text = re.sub(r"\x1b\[[0-9;]*m", "", result.stdout)
+    assert "-V" in help_text and "--version" in help_text
+    assert "--install-completion" not in help_text
+    assert "--show-completion" not in help_text
 
 
 def test_empty_group_invocation_prints_help_without_touching_account_store():
