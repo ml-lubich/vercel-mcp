@@ -23,8 +23,23 @@ def saved(email="saved@example.com", token="vca_saved") -> Account:
 
 
 def test_version():
-    result = runner.invoke(app, ["--version"])
-    assert result.exit_code == 0 and "vgate" in result.stdout
+    for option in ("-V", "--version"):
+        result = runner.invoke(app, [option])
+        assert result.exit_code == 0 and "vgate" in result.stdout
+
+
+def test_root_help_has_only_supported_framework_options():
+    result = runner.invoke(app, ["-h"])
+    assert result.exit_code == 0
+    assert "-V" in result.stdout and "--version" in result.stdout
+    assert "--install-completion" not in result.stdout
+    assert "--show-completion" not in result.stdout
+
+
+def test_empty_group_invocation_prints_help_without_touching_account_store():
+    result = runner.invoke(app, [])
+    assert result.exit_code == 2
+    assert "Commands" in result.stdout
 
 
 def test_help_short_flag_on_root_and_subcommands():
