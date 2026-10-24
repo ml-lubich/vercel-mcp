@@ -43,7 +43,15 @@ def test_empty_group_invocation_prints_help_without_touching_account_store():
 
 
 def test_help_short_flag_on_root_and_subcommands():
-    for args in (["-h"], ["--help"], ["ls", "-h"], ["sync", "-h"], ["agent", "-h"], ["agent", "schema", "-h"]):
+    commands = (
+        ["-h"],
+        ["--help"],
+        ["ls", "-h"],
+        ["sync", "-h"],
+        ["agent", "-h"],
+        ["agent", "schema", "-h"],
+    )
+    for args in commands:
         result = runner.invoke(app, args)
         assert result.exit_code == 0, (args, result.output)
         assert "Usage" in result.output
