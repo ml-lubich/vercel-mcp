@@ -113,8 +113,7 @@ Prior art: [khanakia/vercelgate](https://github.com/khanakia/vercelgate), a Go t
 ## Development
 
 ```bash
-uv venv
-uv pip install -e ".[dev]"
+uv sync --locked --extra dev
 uv run pytest -q
 uv run ruff check .
 ```
