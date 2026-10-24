@@ -119,6 +119,10 @@ uv run pytest -q
 uv run ruff check .
 ```
 
+The pytest configuration measures `vercel_mcp` and fails the suite below 80%
+aggregate line coverage. Tests use isolated temporary configuration and fake
+HTTP responses; they do not switch real Vercel accounts or call the live API.
+
 ## License
 
 MIT © 2026 Misha Lubich

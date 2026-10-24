@@ -65,4 +65,7 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
+addopts = "-q --cov=vercel_mcp --cov-report=term-missing --cov-fail-under=80"
+
+[tool.coverage.run]
+source = ["vercel_mcp"]
