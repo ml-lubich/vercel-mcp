@@ -18,7 +18,7 @@ def build_server():
     if FastMCP is None:
         raise RuntimeError(
             "the `mcp` package is required to run vgate-mcp — install it with "
-            "`pip install 'vercel-mcp[mcp]'` or `pip install mcp`"
+            "`pip install vercel-mcp` or `pip install mcp`"
         )
 
     # FastMCP takes no `version` kwarg — passing one raises TypeError and the
